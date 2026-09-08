@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Loja Exemplo</title></head>
+<body>
+  <header class="masthead"><h1 class="masthead__heading">Ofertas da Semana</h1></header>
+  <main>
+    <section class="catalog catalog--grid">
+      {% for p in products %}
+      <article class="catalog__item" data-testid="product" data-sku="{{ p.sku }}">
+        <h2 class="catalog__name" data-field="product-name">{{ p.name }}</h2>
+        <div class="catalog__pricing">
+          <span class="catalog__amount" data-field="amount">R$ {{ p.price_ptbr }}</span>
+        </div>
+        <a class="catalog__cta" data-field="permalink" href="/demo/produto/{{ p.sku }}/">Detalhes</a>
+        <span class="catalog__availability" data-field="availability">
+          {% if p.stock %}Em estoque{% else %}Indisponível{% endif %}
+        </span>
+      </article>
+      {% endfor %}
+    </section>
+  </main>
+</body>
+</html>

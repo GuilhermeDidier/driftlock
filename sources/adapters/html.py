@@ -5,6 +5,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 import requests
+import soupsieve
 from bs4 import BeautifulSoup, Tag
 
 from .base import ROW_RULE, Adapter, ExtractionError
@@ -52,9 +53,16 @@ class HtmlAdapter(Adapter):
         if not selector:
             return None
 
-        # An empty selector string means "this element", which is useful when
-        # the row itself carries the value.
-        node = row if selector == "." else row.select_one(selector)
+        # CSS selectors match descendants, but the value is often on the row
+        # element itself -- a data-* attribute on the card, say. Falling back to
+        # matching the row keeps the obvious selector working instead of
+        # silently returning nothing.
+        if selector == ".":
+            node = row
+        else:
+            node = row.select_one(selector)
+            if node is None and soupsieve.match(selector, row):
+                node = row
         if node is None:
             return None  # deliberately silent; the contract engine judges it
 

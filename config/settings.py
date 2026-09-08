@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'contracts',
+    'demo',
     'sources',
     'pipeline',
 ]
@@ -150,6 +151,9 @@ DRIFTLOCK = {
     "HEAL_MAX_ATTEMPTS": int(os.environ.get("DRIFTLOCK_HEAL_MAX_ATTEMPTS", "2")),
     "HEAL_MAX_USD_PER_RUN": float(os.environ.get("DRIFTLOCK_HEAL_MAX_USD_PER_RUN", "0.25")),
     "HEAL_DOM_CHAR_BUDGET": int(os.environ.get("DRIFTLOCK_HEAL_DOM_CHARS", "40000")),
+    # Where the demo storefront lives, so the pipeline reaches it over real HTTP
+    # rather than through a shortcut the production path would not take.
+    "DEMO_BASE_URL": os.environ.get("DRIFTLOCK_DEMO_BASE_URL", "http://127.0.0.1:8000"),
 }
 
 if os.environ.get("DATABASE_URL"):

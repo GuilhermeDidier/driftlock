@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Loja Exemplo</title></head>
+<body>
+  <header class="site-header"><h1 class="site-title">Ofertas da Semana</h1></header>
+  <main>
+    <div class="product-grid">
+      {% for p in products %}
+      {# Same cards as v1. Two things moved, and nothing errors:
+         - the name left .title, which is now a static label on every card
+         - .price became .amount                                            #}
+      <div class="product-card">
+        <span class="title">Produto</span>
+        <h3 class="product-name">{{ p.name }}</h3>
+        <span class="amount">{{ p.price|floatformat:2 }}</span>
+        <span class="sku">{{ p.sku }}</span>
+        <a class="link" href="/demo/produto/{{ p.sku }}/">Ver produto</a>
+        <span class="stock">{% if p.stock %}sim{% else %}não{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

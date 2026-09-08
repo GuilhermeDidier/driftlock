@@ -157,3 +157,44 @@ class TestCoercion:
     def test_garbage_raises_rather_than_guessing(self):
         with pytest.raises(CoercionError):
             parse_number("preço a combinar")
+
+
+class TestHtmlRowSelectors:
+    """A value carried on the row element must be reachable."""
+
+    ROW_HTML = '''
+    <div class="grid">
+      <article data-testid="product" data-sku="A1">
+        <h2 data-field="name">Teclado</h2>
+      </article>
+      <article data-testid="product" data-sku="B2">
+        <h2 data-field="name">Monitor</h2>
+      </article>
+    </div>'''
+
+    def test_selector_matching_the_row_itself_is_read(self):
+        from sources.adapters.html import HtmlAdapter
+
+        rows = HtmlAdapter().extract(
+            self.ROW_HTML,
+            {
+                "__row__": {"selector": "article[data-testid=product]"},
+                "sku": {"selector": "[data-sku]", "attr": "data-sku"},
+                "name": {"selector": "[data-field=name]", "attr": "text"},
+            },
+            {},
+        )
+        assert rows == [
+            {"sku": "A1", "name": "Teclado"},
+            {"sku": "B2", "name": "Monitor"},
+        ]
+
+    def test_a_selector_matching_nothing_still_returns_none(self):
+        from sources.adapters.html import HtmlAdapter
+
+        rows = HtmlAdapter().extract(
+            self.ROW_HTML,
+            {"__row__": {"selector": "article"}, "gone": {"selector": ".nope"}},
+            {},
+        )
+        assert rows == [{"gone": None}, {"gone": None}]

@@ -111,6 +111,10 @@ a template to mutate.
 
 Rules:
 - Every contract field must get exactly one rule.
+- Leave a rule alone if it still works. The validator report below tells you
+  which fields are healthy; rewriting those adds risk and proves nothing.
+- A field selector is matched against the row's descendants and against the row
+  element itself, so an attribute carried on the row is reachable directly.
 - Prefer selectors anchored on stable, semantic attributes (data-*, id, role,
   itemprop) over presentational class names, which are the thing that just
   changed.
