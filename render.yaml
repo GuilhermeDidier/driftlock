@@ -14,6 +14,10 @@ services:
         generateValue: true
       - key: DJANGO_ALLOWED_HOSTS
         value: ".onrender.com"
+      # Render terminates TLS in front of the app. Without this the throttle
+      # keys off the proxy's address and every visitor shares one bucket.
+      - key: DRIFTLOCK_NUM_PROXIES
+        value: "1"
       # The pipeline reads the demo storefront over real HTTP, so it needs to
       # know its own public address.
       - key: DRIFTLOCK_DEMO_BASE_URL
