@@ -147,6 +147,13 @@ STORAGES = {
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_THROTTLE_RATES": {
+        "run": os.environ.get("DRIFTLOCK_RUN_RATE", "15/hour"),
+        "layout": os.environ.get("DRIFTLOCK_LAYOUT_RATE", "60/hour"),
+    },
+    # Render terminates TLS in front of the app, so the client address comes
+    # from the forwarded header rather than the socket.
+    "NUM_PROXIES": int(os.environ.get("DRIFTLOCK_NUM_PROXIES", "0")),
 }
 
 # The healer is the only component that spends money. Everything about it is
@@ -156,6 +163,10 @@ DRIFTLOCK = {
     "HEAL_MODEL": os.environ.get("DRIFTLOCK_HEAL_MODEL", "claude-opus-5"),
     "HEAL_MAX_ATTEMPTS": int(os.environ.get("DRIFTLOCK_HEAL_MAX_ATTEMPTS", "2")),
     "HEAL_MAX_USD_PER_RUN": float(os.environ.get("DRIFTLOCK_HEAL_MAX_USD_PER_RUN", "0.25")),
+    # Ceiling on everything the public demo can spend in a rolling 24 hours.
+    # Past it the pipeline keeps detecting drift and keeps failing closed;
+    # it just stops paying for repairs.
+    "PUBLIC_DAILY_USD_CAP": float(os.environ.get("DRIFTLOCK_PUBLIC_DAILY_USD_CAP", "1.00")),
     "HEAL_DOM_CHAR_BUDGET": int(os.environ.get("DRIFTLOCK_HEAL_DOM_CHARS", "40000")),
     # Where the demo storefront lives, so the pipeline reaches it over real HTTP
     # rather than through a shortcut the production path would not take.

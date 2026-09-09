@@ -109,8 +109,24 @@ HTML is pruned to its tag skeleton before it is sent — scripts, styles and pro
 all the bytes live and none of the selector signal does.
 
 The budget check asks whether the *next* attempt fits rather than whether the budget is already
-blown; a backward-looking check always overspends by one attempt. A repair on the demo source
-costs about $0.015 and takes about six seconds.
+blown; a backward-looking check always overspends by one attempt.
+
+A repair is also **scoped to the fields that actually broke**. Rules for healthy fields are carried
+over mechanically, so a working rule cannot be rewritten no matter what the model returns — this is
+a structural guarantee, not an instruction in the prompt, and it is covered by a test that feeds the
+healer a model which rewrites everything. Narrowing the ask also cut output tokens by a third. A
+repair on the demo source costs about $0.014 and takes four to six seconds.
+
+### Limits on the public demo
+
+The repair button spends real money on a real account and is open to anyone with the URL, so it
+has two ceilings: a per-visitor rate limit, and a global cap on what the demo may spend in a
+rolling 24 hours. The spend figure is summed from what runs actually recorded rather than kept in
+a separate counter, so there is nothing to drift out of sync.
+
+Past the cap the demo degrades to detection, not to silence: the source is still read, drift is
+still caught, the batch still fails closed, and the run log says in plain words why no repair was
+attempted.
 
 ## Running it
 
@@ -129,7 +145,7 @@ Set `ANTHROPIC_API_KEY` to enable repairs. Without it, drift is still detected a
 fails closed — Driftlock simply blocks instead of attempting a repair.
 
 ```bash
-./.venv/bin/python -m pytest      # 35 tests
+./.venv/bin/python -m pytest      # 48 tests
 ```
 
 ## What it does not do yet
@@ -140,8 +156,6 @@ fails closed — Driftlock simply blocks instead of attempting a repair.
   it onto Celery means wrapping `run_ingestion`, not rewriting it. That work is not done.
 - **Continuity needs a declared key and one clean run.** A source that has never succeeded has
   nothing to be held to, and Driftlock refuses to promote anything against an empty baseline.
-- **Repairs are sometimes untidy.** The healer occasionally rewrites a rule that still worked.
-  Harmless — both gates still apply — but it adds noise to the diff.
 - **Single tenant.** No accounts, no per-user isolation. It is a demonstration of a mechanism.
 
 ## Licence

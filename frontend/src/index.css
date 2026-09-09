@@ -234,6 +234,26 @@ code, .mono { font-family: var(--mono); font-size: 0.82em; }
 .controls__group { display: flex; gap: 0.7rem; flex-wrap: wrap; }
 .controls__hint { color: var(--muted); font-size: 0.78rem; margin-left: auto; max-width: 32ch; }
 
+/* ---- budget ------------------------------------------------------------ */
+
+.budget {
+  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+  padding: 0.6rem 1.7rem 0.75rem;
+  border-top: 1px solid var(--wire);
+  position: relative;
+}
+.budget__bar {
+  flex: 0 0 8rem; height: 3px; background: var(--wire-firm); border-radius: 2px;
+  overflow: hidden;
+}
+.budget__bar span {
+  display: block; height: 100%; background: var(--sealed);
+  transition: width 400ms ease;
+}
+.budget__text { font-size: 0.76rem; color: var(--muted); max-width: 68ch; }
+.budget--spent .budget__bar span { background: var(--held); }
+.budget--spent .budget__text { color: var(--held); }
+
 /* ---- panels ------------------------------------------------------------ */
 
 .grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.1rem; margin-top: 1.1rem; }

@@ -111,8 +111,6 @@ a template to mutate.
 
 Rules:
 - Every contract field must get exactly one rule.
-- Leave a rule alone if it still works. The validator report below tells you
-  which fields are healthy; rewriting those adds risk and proves nothing.
 - A field selector is matched against the row's descendants and against the row
   element itself, so an attribute carried on the row is reachable directly.
 - Prefer selectors anchored on stable, semantic attributes (data-*, id, role,
@@ -131,18 +129,39 @@ def propose(
     current_rules: dict[str, Any],
     digest: str,
     failure: str,
+    targets: set[str] | None = None,
 ) -> Proposal:
-    """Ask the model for a replacement mapping. Nothing here trusts the answer."""
+    """Ask the model for a replacement mapping. Nothing here trusts the answer.
+
+    `targets` narrows the request to the fields the validator actually flagged.
+    Asking only about what broke is not politeness -- rules for healthy fields
+    are carried over mechanically, so a working rule cannot be rewritten no
+    matter what the model returns. It is also cheaper, and it keeps the audit
+    diff to what genuinely changed.
+
+    `targets` of None means the rows themselves stopped matching, in which case
+    every rule is suspect and the whole mapping is up for replacement.
+    """
     schema = PROPOSAL_MODELS.get(source.kind)
     if schema is None:
         raise HealerUnavailable(f"no heal schema for source kind {source.kind!r}")
 
+    wanted = [f for f in contract.fields if targets is None or f.name in targets]
     fields_block = "\n".join(
         f"- {f.name} ({f.type.value}{'' if f.required else ', optional'}): {f.description}"
-        for f in contract.fields
+        for f in wanted
     )
-    prompt = f"""Contract `{contract.key}` -- the fields that must be filled:
+    scope = (
+        "The rows themselves stopped matching, so every rule needs replacing, "
+        "starting with the one that selects a row."
+        if targets is None else
+        "Only these fields broke. The row selector and every other rule still "
+        "work and will be kept as they are, so return the row selector unchanged."
+    )
+    prompt = f"""Contract `{contract.key}` -- the fields to repair:
 {fields_block}
+
+{scope}
 
 The mapping that used to work:
 {current_rules}
@@ -153,7 +172,7 @@ What the validator observed on the current payload:
 The current payload, pruned to its structure:
 {digest}
 
-Propose a mapping that reads the fields above out of this payload."""
+Propose rules that read the fields above out of this payload."""
 
     model = settings.DRIFTLOCK["HEAL_MODEL"]
     started = time.monotonic()
@@ -171,12 +190,21 @@ Propose a mapping that reads the fields above out of this payload."""
     if parsed is None:
         raise HealerUnavailable("model returned no parseable proposal")
 
+    # Start from what already works and overwrite only what was asked about.
+    # A rule outside `targets` is structurally unreachable from here.
+    rules: dict[str, Any] = dict(current_rules)
     if source.kind == "html":
-        rules: dict[str, Any] = {ROW_RULE: {"selector": parsed.row_selector}}
+        if targets is None:
+            rules[ROW_RULE] = {"selector": parsed.row_selector}
         for rule in parsed.fields:
+            if targets is not None and rule.field not in targets:
+                continue
             rules[rule.field] = {"selector": rule.selector, "attr": rule.attr or "text"}
     else:
-        rules = {rule.field: {"column": rule.column} for rule in parsed.fields}
+        for rule in parsed.fields:
+            if targets is not None and rule.field not in targets:
+                continue
+            rules[rule.field] = {"column": rule.column}
 
     return Proposal(
         rules=rules,

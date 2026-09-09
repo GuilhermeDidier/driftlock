@@ -33,6 +33,7 @@ export interface Run {
   events?: RunEvent[];
   heal_attempts?: HealAttempt[];
   records?: RecordRow[];
+  budget?: Budget;
 }
 
 export interface Mapping {
@@ -62,8 +63,13 @@ export interface Source {
   runs?: Run[];
 }
 
+export interface Budget {
+  spent_usd: string; cap_usd: string; remaining_usd: string; exhausted: boolean;
+}
+
 export interface AppState {
   demo_layout: "v1" | "v2" | "v3";
+  budget: Budget;
   sources: Source[];
   recent_runs: Run[];
 }

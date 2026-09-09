@@ -1,12 +1,21 @@
 const base = import.meta.env.DEV ? "http://127.0.0.1:8000" : "";
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${base}/api${path}`, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });
   if (!response.ok) {
-    throw new Error(`${response.status} on ${path}`);
+    throw new ApiError(response.status, `${response.status} on ${path}`);
   }
   return response.json() as Promise<T>;
 }

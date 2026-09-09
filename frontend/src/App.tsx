@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { api, storeUrl } from "./api";
+import { ApiError, api, storeUrl } from "./api";
 import { Bench } from "./components/Bench";
+import { Budget } from "./components/Budget";
 import { RecordsTable } from "./components/RecordsTable";
 import { RunLog } from "./components/RunLog";
 import { SourcePanel } from "./components/SourcePanel";
-import type { Run, RunEvent, Source } from "./types";
+import type { Budget as BudgetData, Run, RunEvent, Source } from "./types";
 
 const SOURCE_KEY = "loja-exemplo";
 
@@ -23,6 +24,7 @@ export default function App() {
   const [layout, setLayout] = useState<string>("v1");
   const [run, setRun] = useState<Run | null>(null);
   const [visible, setVisible] = useState<RunEvent[]>([]);
+  const [budget, setBudget] = useState<BudgetData | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
@@ -51,6 +53,7 @@ export default function App() {
     try {
       const state = await api.state();
       setLayout(state.demo_layout);
+      setBudget(state.budget);
       const detail = await api.source(SOURCE_KEY);
       setSource(detail);
       if (detail.latest_run) {
@@ -80,10 +83,15 @@ export default function App() {
     try {
       const result = await api.triggerRun(SOURCE_KEY);
       setRun(result);
+      setBudget(result.budget ?? null);
       replay(result.events ?? []);
       setSource(await api.source(SOURCE_KEY));
     } catch (err) {
-      setError("The run could not be started.");
+      setError(
+        err instanceof ApiError && err.status === 429
+          ? "That is as many runs as one visitor gets in an hour. The limit rolls over shortly; the source and its history are unchanged."
+          : "The run could not be started.",
+      );
     } finally {
       setBusy(false);
     }
@@ -129,6 +137,8 @@ export default function App() {
 
         <div className="bench">
           <Bench run={run} events={events} busy={busy} finished={finished} />
+
+          <Budget budget={budget} />
 
           <div className="controls">
             <button className="btn btn--primary" onClick={startRun} disabled={busy}>

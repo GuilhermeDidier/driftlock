@@ -115,7 +115,9 @@ def _promote(source: Source, candidate: Mapping, current: Mapping | None) -> Non
     candidate.save(update_fields=["status", "promoted_at"])
 
 
-def run_ingestion(source: Source, allow_heal: bool = True) -> IngestionRun:
+def run_ingestion(
+    source: Source, allow_heal: bool = True, heal_blocked_reason: str = ""
+) -> IngestionRun:
     run = IngestionRun.objects.create(source=source)
     say = Narrator(run)
     adapter = get_adapter(source.kind)
@@ -166,6 +168,11 @@ def run_ingestion(source: Source, allow_heal: bool = True) -> IngestionRun:
         RunEvent.Level.BLOCK, violations=broken)
 
     if not allow_heal:
+        # Say why out loud. A pipeline that goes quiet is the thing this whole
+        # project exists to prevent, and that applies to its own limits too.
+        say("heal_skipped",
+            heal_blocked_reason or "Repairs are turned off for this run.",
+            RunEvent.Level.WARN)
         return _finish(run, report, IngestionRun.Status.BLOCKED, published=False)
 
     healed_report = _attempt_heal(run, say, source, contract, mapping, raw, report)
@@ -204,6 +211,13 @@ def _attempt_heal(run, say, source, contract, current: Mapping, raw: str, report
     adapter = get_adapter(source.kind)
     failure = "\n".join(v.message for v in report.batch_violations)
 
+    # If no row survived, the row selector itself is suspect and the whole
+    # mapping is up for replacement. Otherwise only the flagged fields are.
+    rows_gone = not report.records or any(
+        v.code == "too_few_records" for v in report.batch_violations
+    )
+    targets = None if rows_gone else {v.field for v in report.batch_violations if v.field}
+
     for attempt in range(1, max_attempts + 1):
         # Stop when the *next* attempt would not fit, not merely once the
         # budget is already blown -- a backward-looking check always overspends
@@ -218,7 +232,9 @@ def _attempt_heal(run, say, source, contract, current: Mapping, raw: str, report
 
         try:
             digest = adapter.structure_digest(raw, conf["HEAL_DOM_CHAR_BUDGET"])
-            proposal = propose(source, contract, current.rules, digest, failure)
+            proposal = propose(
+                source, contract, current.rules, digest, failure, targets=targets
+            )
         except HealerUnavailable as exc:
             HealAttempt.objects.create(
                 run=run, source=source, attempt=attempt, from_mapping=current,
