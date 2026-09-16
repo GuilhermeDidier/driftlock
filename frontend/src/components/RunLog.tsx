@@ -34,10 +34,18 @@ const SHOW_DATA: Record<string, (d: Record<string, any>) => string | null> = {
 
 export function RunLog({ events, busy }: { events: RunEvent[]; busy: boolean }) {
   if (!events.length) {
+    // An empty form is not a void. It is ruled, and it says who fills it in.
     return (
-      <p className="empty">
-        {busy ? "Reading the source…" : "No run yet. Start the pipeline to see what it decides."}
-      </p>
+      <div className="ruled">
+        <div className="ruled__note">
+          {busy ? "Reading the source…" : "To be completed by the run"}
+        </div>
+        <div className="ruled__lines" aria-hidden="true">
+          {Array.from({ length: 7 }, (_, i) => (
+            <span key={i} />
+          ))}
+        </div>
+      </div>
     );
   }
 

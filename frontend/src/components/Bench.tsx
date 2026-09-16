@@ -40,8 +40,9 @@ function flowClass(behind: GateState | "source", read: number): string {
   return "flow";
 }
 
-const GATE_COPY: Record<GateState, string> = {
-  idle: "—",
+/** The line a form leaves blank until someone fills it in. */
+const GATE_ENTRY: Record<GateState, string> = {
+  idle: "",
   busy: "checking",
   open: "passed",
   shut: "held",
@@ -52,53 +53,64 @@ export function Bench({ run, events, busy, finished }: Props) {
   const read = run?.records_read ?? 0;
   const published = finished ? run?.records_published ?? 0 : 0;
 
-  const verdictKind = busy ? "running" : run?.status ?? "running";
+  const verdictKind = busy ? "running" : run ? run.status : "idle";
   const verdictLabel = busy
-    ? "running"
-    : run?.status === "healed"
-      ? "healed · published"
-      : run?.status ?? "no run yet";
+    ? "under inspection"
+    : !run
+      ? "no ruling yet"
+      : run.status === "healed"
+        ? "repaired · published"
+        : run.status;
 
   return (
     <>
+      <div className="bench__stamp">
+        <Stamp kind={verdictKind} label={verdictLabel} pressed={finished} />
+      </div>
+
       <div className="track">
-        <div className="station">
-          <div className="station__label">Read from source</div>
-          <div className="station__count">{read}</div>
-          <div className="station__note">
-            {run?.mapping_version ? `mapping v${run.mapping_version}` : "records"}
+        <div className="box">
+          <span className="box__ord">1</span>
+          <div className="box__label">Presented</div>
+          <div className="box__count">{read}</div>
+          <div className="box__note">
+            {run?.mapping_version ? `read with mapping v${run.mapping_version}` : "records read"}
           </div>
         </div>
 
         <div className={flowClass("source", read)} aria-hidden="true" />
 
-        <div className={`gate is-${one}`}>
-          <div className="gate__ord">Gate one</div>
-          <div className="gate__name">Contract</div>
-          <div className="gate__state">{GATE_COPY[one]}</div>
+        <div className={`box is-${one}`}>
+          <span className="box__ord">2</span>
+          <div className="box__label">Gate one</div>
+          <div className="box__name">Contract</div>
+          <div className="box__entry">{GATE_ENTRY[one]}</div>
+          <div className="box__note">reads clean today</div>
         </div>
 
         <div className={flowClass(one, read)} aria-hidden="true" />
 
-        <div className={`gate is-${two}`}>
-          <div className="gate__ord">Gate two</div>
-          <div className="gate__name">Continuity</div>
-          <div className="gate__state">{GATE_COPY[two]}</div>
+        <div className={`box is-${two}`}>
+          <span className="box__ord">3</span>
+          <div className="box__label">Gate two</div>
+          <div className="box__name">Continuity</div>
+          <div className="box__entry">{GATE_ENTRY[two]}</div>
+          <div className="box__note">recovers what was already right</div>
         </div>
 
         <div className={flowClass(two, read)} aria-hidden="true" />
 
-        <div className={`station station--out${finished && published === 0 ? " is-empty" : ""}`}>
-          <div className="station__label">Published</div>
-          <div className="station__count">{published}</div>
-          <div className="station__note">
+        <div className={`box box--out${finished && published === 0 ? " is-empty" : ""}`}>
+          <span className="box__ord">4</span>
+          <div className="box__label">Published</div>
+          <div className="box__count">{published}</div>
+          <div className="box__note">
             {finished && published === 0 ? "nothing shipped" : "records downstream"}
           </div>
         </div>
       </div>
 
       <div className="bench__verdict">
-        <Stamp kind={verdictKind} label={verdictLabel} pressed={finished} />
         <span className="bench__verdict-note">
           {busy && "Reading the source and checking it against the contract."}
           {!busy && !run && "Run the pipeline while the source still matches its contract."}
@@ -111,7 +123,7 @@ export function Bench({ run, events, busy, finished }: Props) {
           {!busy && run?.status === "error" && run.error}
         </span>
         {run && Number(run.cost_usd) > 0 && (
-          <span className="bench__cost">repair cost ${Number(run.cost_usd).toFixed(4)}</span>
+          <span className="bench__cost">repair ${Number(run.cost_usd).toFixed(4)}</span>
         )}
         {run?.duration_ms != null && !busy && (
           <span className="bench__cost">{(run.duration_ms / 1000).toFixed(1)}s</span>

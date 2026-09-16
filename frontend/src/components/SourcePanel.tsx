@@ -9,7 +9,12 @@ function ruleText(rule: Record<string, unknown>): string {
 export function SourcePanel({ source }: { source: Source }) {
   const mapping = source.active_mapping;
   const contract = source.contract;
-  const changed = new Set(Object.keys(mapping?.diff ?? {}));
+  // A hand-written mapping has nothing to have changed *from*: the API reports
+  // every field as new, which is true and is not a repair. Only a healed
+  // mapping's diff marks what was actually rewritten.
+  const changed = new Set(
+    mapping?.origin === "heal" ? Object.keys(mapping.diff ?? {}) : [],
+  );
 
   return (
     <div className="panel__body">
@@ -45,14 +50,12 @@ export function SourcePanel({ source }: { source: Source }) {
             <>
               <div className="divider" />
               <div className="section-label">Why it changed</div>
-              <p style={{ margin: 0, fontSize: "0.84rem", color: "var(--paper-dim)" }}>
-                {mapping.note}
-              </p>
+              <p className="note">{mapping.note}</p>
             </>
           )}
         </>
       ) : (
-        <p className="empty" style={{ padding: 0 }}>No mapping yet.</p>
+        <p className="note">No mapping yet.</p>
       )}
 
       <div className="divider" />
@@ -71,7 +74,7 @@ export function SourcePanel({ source }: { source: Source }) {
           <dd>{Math.round(contract.continuity_threshold * 100)}%</dd>
         </dl>
       ) : (
-        <p style={{ margin: 0, fontSize: "0.84rem", color: "var(--muted)" }}>
+        <p className="note">
           None yet. A repair cannot be promoted until one clean run establishes what
           the right answer looks like.
         </p>

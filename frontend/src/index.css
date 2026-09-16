@@ -1,30 +1,47 @@
-/* Driftlock — an inspection bench, not a dashboard.
-   Colour carries meaning here: every accent is a verdict, never decoration. */
+/* Driftlock — a declaration form, not a dashboard.
+ *
+ * Three inks, and the difference between them is the whole argument:
+ *   the FORM is printed (pale steel) — it is the authority, fixed before anything arrives
+ *   the ENTRY is typed  (carbon)     — it is the proposal, filled in per run
+ *   the VERDICT is stamped (ink)     — it is the decision, pressed over the form
+ * Colour is never decoration here: an ink means a ruling. */
 
 :root {
-  --ink:        #0d1826;
-  --ink-raised: #14243a;
-  --ink-sunken: #0a121e;
-  --wire:       rgba(163, 190, 224, 0.14);
-  --wire-firm:  rgba(163, 190, 224, 0.28);
+  /* stock */
+  --paper:      #e5dcc6;
+  --paper-lit:  #f5f0e3;
+  --paper-sunk: #e9e1cd;
 
-  --paper:      #e8eef6;
-  --paper-dim:  #a9bad0;
-  --muted:      #6d829e;
+  /* printed ink — everything pre-printed on the blank form */
+  --print:      #5c7a94;
+  --print-soft: rgba(92, 122, 148, 0.42);
+  --print-hair: rgba(92, 122, 148, 0.26);
 
-  --sealed:     #46b98d;   /* published — proven, admissible */
-  --held:       #dda155;   /* quarantined — a row, not the batch */
-  --refused:    #e0614c;   /* blocked — nothing ships */
-  --pending:    #5d8ec9;   /* running */
+  /* typed ink — everything filled in per run */
+  --carbon:     #241f1a;
+  --carbon-mid: #5a5149;
+  --carbon-pale:#6f665c;
 
-  --stamp-rotate: -2.4deg;
+  /* stamp inks — one per ruling */
+  --cleared:    #1c6b4f;
+  --held:       #6a4a91;
+  --refused:    #b02a1e;
+  --pending:    #2c5f86;
 
-  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --stamp-tilt: -3.6deg;
+
+  --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --body:    "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
-  --stamp:   "Archivo Narrow", "Public Sans", sans-serif;
+  --form:    "Archivo Narrow", "Archivo", sans-serif;
+  --type:    "Courier Prime", ui-monospace, "Courier New", monospace;
 
-  --gutter: clamp(1.1rem, 3.2vw, 2.75rem);
+  /* aliases kept so older inline styles resolve to the new palette */
+  --paper-dim: var(--carbon-mid);
+  --muted:     var(--carbon-pale);
+  --sealed:    var(--cleared);
+  --mono:      var(--type);
+
+  --gutter: clamp(1rem, 3vw, 2.5rem);
 }
 
 * { box-sizing: border-box; }
@@ -33,330 +50,425 @@ html, body, #root { min-height: 100%; }
 
 body {
   margin: 0;
-  background:
-    radial-gradient(1100px 620px at 78% -12%, rgba(70, 185, 141, 0.09), transparent 62%),
-    radial-gradient(900px 520px at 8% 4%, rgba(93, 142, 201, 0.10), transparent 58%),
-    var(--ink);
-  color: var(--paper);
+  color: var(--carbon);
   font-family: var(--body);
   font-size: 15px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  background-color: var(--paper);
+  /* paper grain — fibre, not texture-for-its-own-sake */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-blend-mode: multiply;
 }
 
-h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; letter-spacing: -0.022em; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; letter-spacing: -0.02em; }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid var(--pending);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
-code, .mono { font-family: var(--mono); font-size: 0.82em; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
-.shell { max-width: 1240px; margin: 0 auto; padding: 0 var(--gutter) 5rem; }
+.shell { max-width: 1180px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.4rem) var(--gutter) 4rem; }
 
-/* ---- masthead ---------------------------------------------------------- */
+/* ---- the form's head band ---------------------------------------------- */
 
 .masthead {
-  display: flex; align-items: baseline; gap: 1.1rem; flex-wrap: wrap;
-  padding: 1.6rem 0 1.2rem;
-  border-bottom: 1px solid var(--wire);
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: var(--print);
+  color: var(--paper-lit);
 }
 .wordmark {
-  font-family: var(--display); font-weight: 800; font-size: 1.32rem;
-  letter-spacing: -0.03em;
+  font-family: var(--display); font-weight: 800; font-size: 1.15rem;
+  letter-spacing: 0.01em;
 }
-.wordmark span { color: var(--sealed); }
+.wordmark span { opacity: 0.62; }
 .masthead__tag {
-  font-family: var(--stamp); text-transform: uppercase;
-  letter-spacing: 0.13em; font-size: 0.7rem; color: var(--muted);
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.18em; font-size: 0.66rem; opacity: 0.85;
+  padding-left: 1rem; border-left: 1px solid rgba(244, 239, 225, 0.35);
 }
 .masthead__spacer { flex: 1 1 auto; }
-.masthead__meta { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
+.masthead__meta {
+  font-family: var(--type); font-size: 0.7rem; opacity: 0.88;
+  overflow-wrap: anywhere;
+}
 
 /* ---- hero -------------------------------------------------------------- */
 
-.hero { padding: 2.9rem 0 1.4rem; }
+.hero { padding: 2.4rem 0 0; }
 .hero__lede {
-  font-family: var(--display); font-weight: 600;
-  font-size: clamp(1.65rem, 3.7vw, 2.9rem);
-  line-height: 1.1; letter-spacing: -0.03em; max-width: 22ch;
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(1.7rem, 4vw, 3.05rem);
+  line-height: 1.05; letter-spacing: -0.028em; max-width: 21ch;
 }
-.hero__lede em { font-style: normal; color: var(--sealed); }
+/* The one clause that is the product: underscored the way a form underscores
+   the answer that matters, not coloured like a marketing highlight. */
+.hero__lede em {
+  font-style: normal;
+  text-decoration: underline;
+  text-decoration-color: var(--refused);
+  text-decoration-thickness: 0.055em;
+  text-underline-offset: 0.11em;
+}
 .hero__sub {
-  margin-top: 0.95rem; max-width: 58ch; color: var(--paper-dim); font-size: 1rem;
+  margin-top: 1rem; max-width: 62ch; color: var(--carbon-mid); font-size: 1rem;
 }
 
-/* ---- the gate apparatus (signature) ------------------------------------ */
+/* ---- the sheet: a form with numbered boxes (signature) ----------------- */
 
 .bench {
-  margin-top: 2.1rem;
-  border: 1px solid var(--wire-firm);
-  background: linear-gradient(180deg, var(--ink-raised), var(--ink-sunken));
-  border-radius: 3px;
+  margin-top: 2.2rem;
+  border: 1.5px solid var(--print);
+  background: var(--paper-lit);
   position: relative;
-  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(36, 31, 26, 0.13), 0 3px 10px rgba(36, 31, 26, 0.055);
 }
+/* the double rule a printed form carries inside its trim */
+.bench::before {
+  content: ""; position: absolute; inset: 3px; border: 1px solid var(--print-hair);
+  pointer-events: none;
+}
+
 .track {
-  display: flex; align-items: center;
-  padding: 2.4rem 1.7rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 2rem 1fr 2rem 1fr 2rem 1fr;
+  align-items: stretch;
+  padding: 1.5rem 1.4rem 1.3rem;
+}
+@media (max-width: 860px) {
+  .track { grid-template-columns: 1fr; padding: 1.1rem 0.9rem; }
+}
+
+/* every box on the form is numbered, because a form's boxes are numbered */
+.box {
   position: relative;
+  border: 1px solid var(--print-soft);
+  padding: 1.5rem 0.8rem 0.9rem;
+  text-align: center;
+  background: var(--paper-lit);
+  transition: border-color 200ms ease, background 200ms ease;
 }
-@media (max-width: 820px) {
-  .track { flex-direction: column; align-items: stretch; gap: 0.9rem; padding: 1.6rem 1.1rem; }
+.box__ord {
+  position: absolute; top: 0; left: 0;
+  background: var(--print); color: var(--paper-lit);
+  font-family: var(--form); font-weight: 700; font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  padding: 0.08rem 0.36rem;
 }
+.box__label {
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  font-size: 0.64rem; letter-spacing: 0.15em; color: var(--print);
+}
+.box__count {
+  font-family: var(--type); font-weight: 700;
+  font-size: clamp(2rem, 4.4vw, 2.9rem); line-height: 1.05;
+  margin-top: 0.2rem; font-variant-numeric: tabular-nums;
+  color: var(--carbon);
+}
+.box__name {
+  font-family: var(--display); font-weight: 700; font-size: 1.05rem;
+  letter-spacing: -0.012em; margin-top: 0.45rem; color: var(--carbon);
+}
+/* the ruled line a form leaves for the answer, and the answer typed onto it */
+.box__entry {
+  margin: 0.55rem auto 0; max-width: 8.5rem;
+  border-bottom: 1px solid var(--print-soft);
+  font-family: var(--type); font-size: 0.74rem; min-height: 1.5em;
+  color: var(--carbon-mid); padding-bottom: 0.12rem;
+}
+.box__note { font-size: 0.72rem; color: var(--carbon-pale); margin-top: 0.3rem; }
 
-.station { flex: 0 0 auto; width: 8.5rem; text-align: center; }
-.station__label {
-  font-family: var(--stamp); text-transform: uppercase;
-  font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted);
-}
-.station__count {
-  font-family: var(--display); font-weight: 800;
-  font-size: clamp(2.1rem, 4.4vw, 3rem); line-height: 1;
-  letter-spacing: -0.04em; margin-top: 0.3rem;
-  font-variant-numeric: tabular-nums;
-}
-.station__note { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
-.station--out .station__count { color: var(--sealed); }
-.station--out.is-empty .station__count { color: var(--refused); }
+.box.is-open   { border-color: var(--cleared); background: rgba(28, 107, 79, 0.06); }
+.box.is-open   .box__entry { color: var(--cleared); border-bottom-color: var(--cleared); }
+.box.is-shut   { border-color: var(--refused); background: rgba(176, 42, 30, 0.06); }
+.box.is-shut   .box__entry { color: var(--refused); border-bottom-color: var(--refused); }
+.box.is-busy   { border-color: var(--pending); }
+.box.is-busy   .box__entry { color: var(--pending); }
+.box--out .box__count { color: var(--cleared); }
+.box--out.is-empty .box__count { color: var(--refused); }
 
-/* The line records travel along. It stops where a gate stops them. */
+/* the channel between boxes: printed dots until something actually travels */
 .flow {
-  flex: 1 1 auto; height: 1px; min-width: 1.6rem;
-  background: var(--wire-firm); position: relative;
-  transition: background 240ms ease;
+  align-self: center; height: 0; position: relative;
+  border-top: 1px dashed var(--print-soft);
+  margin: 0 0.35rem;
 }
 .flow::after {
-  content: ""; position: absolute; right: 0; top: -3.5px;
-  border-left: 6px solid var(--wire-firm);
-  border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent;
-  transition: border-left-color 240ms ease;
+  content: ""; position: absolute; right: -1px; top: -4px;
+  border-left: 6px solid var(--print-soft);
+  border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  transition: border-left-color 200ms ease;
 }
-.flow.is-live { background: var(--sealed); }
-.flow.is-live::after { border-left-color: var(--sealed); }
-.flow.is-stopped {
-  background: repeating-linear-gradient(90deg, var(--refused) 0 5px, transparent 5px 10px);
+.flow.is-live { border-top: 1.5px solid var(--cleared); }
+.flow.is-live::after { border-left-color: var(--cleared); }
+/* held: the channel is struck through, the way a clerk voids a line */
+.flow.is-stopped { border-top: 1.5px solid var(--refused); }
+.flow.is-stopped::after {
+  border: 0; right: 50%; top: -5px; transform: translateX(50%);
+  width: 10px; height: 10px; color: var(--refused);
+  background:
+    linear-gradient(45deg, transparent 44%, currentColor 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, currentColor 44% 56%, transparent 56%);
 }
-.flow.is-stopped::after { border-left-color: transparent; }
-@media (max-width: 820px) {
-  .flow { width: 100%; height: 1.4rem; background: none; }
+@media (max-width: 860px) {
+  .flow { height: 1.1rem; border-top: 0; border-left: 1px dashed var(--print-soft);
+          margin: 0 auto; width: 0; }
   .flow::after { display: none; }
+  .flow.is-live { border-top: 0; border-left: 1.5px solid var(--cleared); }
+  .flow.is-stopped { border-top: 0; border-left: 1.5px solid var(--refused); }
 }
 
-/* A gate is a barrier, so it is drawn as one. */
-.gate {
-  flex: 0 0 auto; width: 9.5rem;
-  padding: 0.95rem 0.6rem; text-align: center;
-  border-left: 2px solid var(--wire-firm);
-  border-right: 2px solid var(--wire-firm);
-  transition: border-color 240ms ease, background 240ms ease;
-}
-@media (max-width: 820px) { .gate { width: 100%; border: 1px solid var(--wire-firm); } }
-.gate__ord {
-  font-family: var(--stamp); font-size: 0.6rem; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--muted);
-}
-.gate__name {
-  font-family: var(--display); font-weight: 600; font-size: 1rem;
-  letter-spacing: -0.015em; margin-top: 0.12rem;
-}
-.gate__state {
-  font-family: var(--mono); font-size: 0.68rem; margin-top: 0.4rem;
-  color: var(--muted); min-height: 1.1em;
-}
-.gate.is-open  { border-color: var(--sealed); background: rgba(70, 185, 141, 0.09); }
-.gate.is-open  .gate__state { color: var(--sealed); }
-.gate.is-shut  { border-color: var(--refused); background: rgba(224, 97, 76, 0.10); }
-.gate.is-shut  .gate__state { color: var(--refused); }
-.gate.is-busy  { border-color: var(--pending); }
-.gate.is-busy  .gate__state { color: var(--pending); }
+/* ---- the stamp --------------------------------------------------------- */
 
-
-/* ---- verdict stamp ----------------------------------------------------- */
-
+/* A stamp that respects the layout grid is not a stamp. This one is pressed
+   over the boxes, crosses their borders, and sits at an angle a hand made. */
 .stamp {
-  display: inline-block;
-  font-family: var(--stamp); font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.19em; font-size: 0.74rem;
-  padding: 0.34rem 0.85rem 0.28rem;
-  border: 2px solid currentColor; border-radius: 2px;
-  transform: rotate(var(--stamp-rotate));
+  display: inline-block; position: relative;
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.16em; font-size: 0.8rem; line-height: 1;
+  padding: 0.5rem 1rem 0.44rem;
+  border: 2.5px solid currentColor;
+  transform: rotate(var(--stamp-tilt));
+  filter: url(#stamp-rough);
+  opacity: 0.88;
+  white-space: nowrap;
 }
-.stamp--published { color: var(--sealed); }
-.stamp--healed    { color: var(--sealed); }
-.stamp--blocked   { color: var(--refused); }
-.stamp--error     { color: var(--refused); }
-.stamp--running   { color: var(--pending); }
-.stamp--pass      { color: var(--sealed); }
-.stamp--partial   { color: var(--held); }
-.stamp--drift     { color: var(--refused); }
+.stamp::before {
+  content: ""; position: absolute; inset: 3px; border: 1px solid currentColor;
+}
+.stamp--published, .stamp--healed, .stamp--pass { color: var(--cleared); }
+.stamp--blocked, .stamp--error, .stamp--drift   { color: var(--refused); }
+.stamp--partial  { color: var(--held); }
+.stamp--running  { color: var(--pending); }
+/* nothing ruled yet: the blank space on the form where a stamp will go */
+.stamp--idle {
+  color: var(--print); border-style: dashed; border-width: 1.5px;
+  filter: none; opacity: 0.7; font-weight: 600;
+}
+.stamp--idle::before { display: none; }
 
-.stamp--pressed { animation: press 340ms cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.stamp--pressed { animation: press 300ms cubic-bezier(0.18, 1.5, 0.42, 1) both; }
 @keyframes press {
-  0%   { transform: rotate(var(--stamp-rotate)) scale(1.5); opacity: 0; }
-  60%  { transform: rotate(var(--stamp-rotate)) scale(0.97); opacity: 1; }
-  100% { transform: rotate(var(--stamp-rotate)) scale(1); opacity: 1; }
+  0%   { transform: rotate(var(--stamp-tilt)) scale(1.65); opacity: 0; }
+  55%  { transform: rotate(var(--stamp-tilt)) scale(0.95); opacity: 0.95; }
+  100% { transform: rotate(var(--stamp-tilt)) scale(1); opacity: 0.88; }
 }
+
+.bench__stamp {
+  position: absolute; right: 2.6rem; top: 0.9rem; z-index: 3; pointer-events: none;
+}
+@media (max-width: 860px) { .bench__stamp { position: static; margin: 0.4rem 0 0 0.9rem; } }
+
+/* ---- verdict line, budget, controls ------------------------------------ */
 
 .bench__verdict {
-  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-  padding: 0.9rem 1.6rem 1.2rem; border-top: 1px solid var(--wire);
-  position: relative;
+  display: flex; align-items: baseline; gap: 0.9rem; flex-wrap: wrap;
+  padding: 0.8rem 1.4rem 0.9rem; border-top: 1px solid var(--print-hair);
 }
-.bench__verdict-note { color: var(--paper-dim); font-size: 0.86rem; }
+.bench__verdict-note { color: var(--carbon-mid); font-size: 0.88rem; max-width: 74ch; }
 .bench__cost {
-  margin-left: auto; font-family: var(--mono); font-size: 0.74rem; color: var(--muted);
+  margin-left: auto; font-family: var(--type); font-size: 0.74rem; color: var(--print);
+  white-space: nowrap;
 }
-
-/* ---- controls ---------------------------------------------------------- */
-
-.controls {
-  display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center;
-  padding: 1.1rem 1.6rem; border-top: 1px solid var(--wire);
-  background: rgba(10, 18, 30, 0.55); position: relative;
-}
-.btn {
-  border: 1px solid var(--wire-firm); background: transparent; color: var(--paper);
-  border-radius: 2px; padding: 0.6rem 1.05rem;
-  font-weight: 600; font-size: 0.88rem;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
-}
-.btn:hover:not(:disabled) { border-color: var(--paper-dim); background: rgba(232, 238, 246, 0.06); }
-.btn:disabled { opacity: 0.42; cursor: not-allowed; }
-.btn--primary { border-color: var(--sealed); color: var(--sealed); }
-.btn--primary:hover:not(:disabled) { background: rgba(70, 185, 141, 0.12); }
-.btn--break { border-color: rgba(224, 97, 76, 0.55); color: var(--refused); }
-.btn--break:hover:not(:disabled) { background: rgba(224, 97, 76, 0.12); }
-.btn--break.is-active { background: rgba(224, 97, 76, 0.18); border-color: var(--refused); }
-.btn--quiet { border-color: var(--wire); color: var(--paper-dim); font-weight: 500; }
-.controls__group { display: flex; gap: 0.7rem; flex-wrap: wrap; }
-.controls__hint { color: var(--muted); font-size: 0.78rem; margin-left: auto; max-width: 32ch; }
-
-/* ---- budget ------------------------------------------------------------ */
 
 .budget {
-  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
-  padding: 0.6rem 1.7rem 0.75rem;
-  border-top: 1px solid var(--wire);
-  position: relative;
+  display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+  padding: 0.55rem 1.4rem 0.7rem; border-top: 1px solid var(--print-hair);
 }
 .budget__bar {
-  flex: 0 0 8rem; height: 3px; background: var(--wire-firm); border-radius: 2px;
+  flex: 0 0 7rem; height: 6px; border: 1px solid var(--print-soft);
   overflow: hidden;
 }
 .budget__bar span {
-  display: block; height: 100%; background: var(--sealed);
+  display: block; height: 100%; background: var(--cleared);
   transition: width 400ms ease;
 }
-.budget__text { font-size: 0.76rem; color: var(--muted); max-width: 68ch; }
+.budget__text { font-size: 0.76rem; color: var(--carbon-mid); max-width: 70ch; }
 .budget--spent .budget__bar span { background: var(--held); }
 .budget--spent .budget__text { color: var(--held); }
 
-/* ---- panels ------------------------------------------------------------ */
+.controls {
+  display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;
+  padding: 0.95rem 1.4rem; border-top: 1px solid var(--print-hair);
+  background: var(--paper-sunk);
+}
+.btn {
+  border: 1px solid var(--print); background: var(--paper-lit); color: var(--carbon);
+  padding: 0.52rem 1rem;
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: 0.76rem;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease,
+              box-shadow 140ms ease, transform 80ms ease;
+}
+.btn:hover:not(:disabled) { background: var(--paper); box-shadow: 2px 2px 0 var(--print-soft); }
+.btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn--primary {
+  background: var(--print); border-color: var(--print); color: var(--paper-lit);
+}
+.btn--primary:hover:not(:disabled) { background: #4d6a83; box-shadow: 2px 2px 0 var(--carbon-pale); }
+.btn--break { border-color: var(--refused); color: var(--refused); }
+.btn--break:hover:not(:disabled) { background: rgba(176, 42, 30, 0.08); }
+.btn--break.is-active { background: rgba(176, 42, 30, 0.14); }
+.btn--quiet { border-color: var(--print-soft); color: var(--carbon-mid); }
+.controls__group { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.controls__hint {
+  color: var(--carbon-mid); font-size: 0.76rem; margin-left: auto; max-width: 34ch;
+}
+.controls__hint a { color: var(--print); }
 
-.grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.1rem; margin-top: 1.1rem; }
+/* ---- filed sections ---------------------------------------------------- */
+
+/* An unfilled section is short. Stretching it to match its neighbour is how
+   the old layout turned "nothing has run yet" into half a screen of void. */
+.grid {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 1rem; margin-top: 1rem;
+  align-items: start;
+}
 @media (max-width: 940px) { .grid { grid-template-columns: 1fr; } }
 
 .panel {
-  border: 1px solid var(--wire); border-radius: 3px;
-  background: rgba(20, 36, 58, 0.5);
+  border: 1.5px solid var(--print); background: var(--paper-lit);
+  box-shadow: 0 1px 0 rgba(36, 31, 26, 0.13), 0 3px 10px rgba(36, 31, 26, 0.055);
 }
 .panel__head {
   display: flex; align-items: center; gap: 0.7rem;
-  padding: 0.85rem 1.15rem; border-bottom: 1px solid var(--wire);
+  padding: 0.45rem 0.9rem;
+  background: var(--print); color: var(--paper-lit);
+}
+.panel__ord {
+  font-family: var(--form); font-weight: 700; font-size: 0.66rem;
+  letter-spacing: 0.08em; opacity: 0.72;
 }
 .panel__title {
-  font-family: var(--stamp); text-transform: uppercase;
-  letter-spacing: 0.15em; font-size: 0.7rem; color: var(--paper-dim);
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.16em; font-size: 0.7rem;
 }
-.panel__aside { margin-left: auto; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
-.panel__body { padding: 1.05rem 1.15rem; }
+.panel__aside {
+  margin-left: auto; font-family: var(--type); font-size: 0.68rem; opacity: 0.85;
+}
+.panel__body { padding: 0.95rem 1rem; }
 .panel__body--flush { padding: 0; }
 
-/* ---- run log ----------------------------------------------------------- */
+/* ---- inspection record (run log) --------------------------------------- */
 
 .log { list-style: none; margin: 0; padding: 0; }
 .log__item {
-  display: grid; grid-template-columns: 2.1rem 1fr; gap: 0.75rem;
-  padding: 0.62rem 1.15rem;
-  border-bottom: 1px solid var(--wire);
-  animation: slide-in 260ms ease both;
+  display: grid; grid-template-columns: 2rem 1fr; gap: 0.7rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--print-hair);
+  animation: slide-in 220ms ease both;
 }
 .log__item:last-child { border-bottom: 0; }
 @keyframes slide-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 
 .log__seq {
-  font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
-  padding-top: 0.16rem; font-variant-numeric: tabular-nums;
+  font-family: var(--type); font-size: 0.7rem; color: var(--print);
+  padding-top: 0.1rem; font-variant-numeric: tabular-nums;
 }
 .log__code {
-  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.02em;
-  color: var(--paper-dim);
+  font-family: var(--type); font-size: 0.7rem; color: var(--carbon-pale);
+  text-transform: uppercase; letter-spacing: 0.04em;
 }
-.log__msg { font-size: 0.88rem; margin-top: 0.1rem; }
-.log__item--ok    .log__code { color: var(--sealed); }
+.log__msg { font-size: 0.88rem; margin-top: 0.06rem; }
+.log__item--ok    .log__code { color: var(--cleared); }
 .log__item--warn  .log__code { color: var(--held); }
 .log__item--block .log__code { color: var(--refused); }
-.log__item--block .log__msg  { color: var(--paper); }
+.log__item--block .log__msg  { font-weight: 600; }
 
 .log__data {
-  margin-top: 0.45rem; padding: 0.55rem 0.7rem;
-  border-left: 2px solid var(--wire-firm);
-  background: rgba(10, 18, 30, 0.55);
-  font-family: var(--mono); font-size: 0.7rem; color: var(--paper-dim);
+  margin: 0.4rem 0 0; padding: 0.5rem 0.65rem;
+  border-left: 2px solid var(--print-soft);
+  background: var(--paper-sunk);
+  font-family: var(--type); font-size: 0.7rem; color: var(--carbon);
   overflow-x: auto; white-space: pre;
 }
 
-/* ---- key/value + rules ------------------------------------------------- */
+/* An empty form is not a void. It is ruled, and it says who fills it. */
+.ruled { padding: 0.75rem 1rem 0.9rem; }
+.ruled__note {
+  font-family: var(--form); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.15em; font-size: 0.62rem; color: var(--print);
+  margin-bottom: 0.6rem;
+}
+.ruled__lines { display: grid; gap: 0.95rem; }
+.ruled__lines span { display: block; height: 1px; background: var(--print-hair); }
+.ruled--tight .ruled__lines { gap: 0.8rem; }
 
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 0.32rem 0.9rem; font-size: 0.84rem; }
-.kv dt { color: var(--muted); }
-.kv dd { margin: 0; font-family: var(--mono); font-size: 0.76rem; }
+/* ---- key/value + printed rules ----------------------------------------- */
 
-.rules { font-family: var(--mono); font-size: 0.72rem; }
-.rule { display: grid; grid-template-columns: 5.2rem 1fr; gap: 0.6rem; padding: 0.22rem 0; }
-.rule__field { color: var(--muted); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.85rem; font-size: 0.84rem; }
+.kv dt {
+  font-family: var(--form); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: 0.64rem; color: var(--print); padding-top: 0.22rem;
+}
+.kv dd { margin: 0; font-family: var(--type); font-size: 0.76rem; }
+
+.rules { font-family: var(--type); font-size: 0.73rem; }
+.rule {
+  display: grid; grid-template-columns: 5rem 1fr; gap: 0.6rem;
+  padding: 0.24rem 0; border-bottom: 1px dotted var(--print-hair);
+}
+.rule:last-child { border-bottom: 0; }
+.rule__field { color: var(--print); }
 .rule__val { overflow-wrap: anywhere; }
-.rule--changed .rule__val { color: var(--sealed); }
-.rule__was { color: var(--refused); text-decoration: line-through; opacity: 0.75; display: block; }
+.rule--changed .rule__val { color: var(--cleared); font-weight: 700; }
+.rule__was { color: var(--refused); text-decoration: line-through; opacity: 0.8; display: block; }
 
-.divider { height: 1px; background: var(--wire); margin: 0.95rem 0; }
+.divider { height: 1px; background: var(--print-hair); margin: 0.9rem 0; }
 
 .section-label {
-  font-family: var(--stamp); text-transform: uppercase; letter-spacing: 0.15em;
-  font-size: 0.66rem; color: var(--muted); margin-bottom: 0.45rem;
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.15em; font-size: 0.64rem; color: var(--print);
+  margin-bottom: 0.45rem;
 }
+.note { margin: 0; font-size: 0.84rem; color: var(--carbon-mid); }
 
-/* ---- records table ----------------------------------------------------- */
+/* ---- manifest table ---------------------------------------------------- */
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 th {
-  text-align: left; font-family: var(--stamp); text-transform: uppercase;
-  letter-spacing: 0.13em; font-size: 0.64rem; color: var(--muted);
-  padding: 0.55rem 1.15rem; border-bottom: 1px solid var(--wire); white-space: nowrap;
+  text-align: left; font-family: var(--form); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.13em; font-size: 0.62rem;
+  color: var(--print); padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--print-soft); white-space: nowrap;
 }
 td {
-  padding: 0.5rem 1.15rem; border-bottom: 1px solid var(--wire);
-  font-family: var(--mono); font-size: 0.74rem; vertical-align: top;
+  padding: 0.44rem 1rem; border-bottom: 1px dotted var(--print-hair);
+  font-family: var(--type); font-size: 0.74rem; vertical-align: top;
 }
 tbody tr:last-child td { border-bottom: 0; }
+tbody tr:nth-child(even) { background: rgba(92, 122, 148, 0.045); }
+
 .tag {
-  font-family: var(--stamp); text-transform: uppercase; font-size: 0.6rem;
-  letter-spacing: 0.13em; border: 1px solid currentColor; border-radius: 2px;
-  padding: 0.08rem 0.4rem; white-space: nowrap;
+  font-family: var(--form); font-weight: 700; text-transform: uppercase;
+  font-size: 0.58rem; letter-spacing: 0.12em;
+  border: 1px solid currentColor; padding: 0.06rem 0.38rem; white-space: nowrap;
 }
-.tag--published   { color: var(--sealed); }
+.tag--published   { color: var(--cleared); }
 .tag--quarantined { color: var(--held); }
 .tag--withheld    { color: var(--refused); }
 
-.empty { color: var(--muted); font-size: 0.86rem; padding: 1.4rem 1.15rem; }
+.empty { color: var(--carbon-mid); font-size: 0.85rem; padding: 1rem; }
+.alert {
+  margin: 1rem 0 0; padding: 0.7rem 0.9rem;
+  border: 1px solid var(--refused); border-left-width: 4px;
+  background: rgba(176, 42, 30, 0.06);
+  color: var(--refused); font-size: 0.86rem;
+}
 
 .foot {
-  margin-top: 2.4rem; padding-top: 1.2rem; border-top: 1px solid var(--wire);
-  color: var(--muted); font-size: 0.78rem; display: flex; gap: 1.2rem; flex-wrap: wrap;
+  margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--print-hair);
+  color: var(--carbon-mid); font-size: 0.76rem;
+  display: flex; gap: 1.4rem; flex-wrap: wrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

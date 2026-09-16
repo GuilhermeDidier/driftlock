@@ -112,11 +112,26 @@ export default function App() {
 
   return (
     <div className="shell">
+      {/* Rubber ink is never clean. The displacement is what makes the stamp
+          read as pressed rather than drawn. */}
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true" focusable="false">
+        <filter id="stamp-rough">
+          <feTurbulence type="fractalNoise" baseFrequency="0.92" numOctaves="3" result="ink" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="ink"
+            scale="1.8"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </svg>
+
       <header className="masthead">
         <div className="wordmark">
           drift<span>lock</span>
         </div>
-        <div className="masthead__tag">proof before publication</div>
+        <div className="masthead__tag">declaration of admissibility</div>
         <div className="masthead__spacer" />
         <div className="masthead__meta">
           {source ? `${source.key} · ${source.kind} · contract ${source.contract.key}` : "…"}
@@ -167,26 +182,23 @@ export default function App() {
             </div>
             <span className="controls__hint">
               {LAYOUTS.find((l) => l.id === layout)?.hint}{" "}
-              <a href={storeUrl} target="_blank" rel="noreferrer" style={{ color: "var(--paper-dim)" }}>
+              <a href={storeUrl} target="_blank" rel="noreferrer">
                 See the page
               </a>
             </span>
           </div>
         </div>
 
-        {error && (
-          <p className="empty" style={{ color: "var(--refused)", paddingLeft: 0 }}>
-            {error}
-          </p>
-        )}
+        {error && <p className="alert">{error}</p>}
       </section>
 
       <div className="grid">
         <section className="panel">
           <div className="panel__head">
-            <span className="panel__title">Run log</span>
+            <span className="panel__ord">5</span>
+            <span className="panel__title">Inspection record</span>
             <span className="panel__aside">
-              {run ? `run #${run.id} · replayed in order` : "waiting"}
+              {run ? `run #${run.id} · replayed in order` : "no run filed"}
             </span>
           </div>
           <div className="panel__body panel__body--flush">
@@ -196,16 +208,18 @@ export default function App() {
 
         <section className="panel">
           <div className="panel__head">
-            <span className="panel__title">Source state</span>
+            <span className="panel__ord">6</span>
+            <span className="panel__title">Source and contract</span>
             <span className="panel__aside">{source?.name ?? ""}</span>
           </div>
           {source && <SourcePanel source={source} />}
         </section>
       </div>
 
-      <section className="panel" style={{ marginTop: "1.1rem" }}>
+      <section className="panel" style={{ marginTop: "1rem" }}>
         <div className="panel__head">
-          <span className="panel__title">Records</span>
+          <span className="panel__ord">7</span>
+          <span className="panel__title">Manifest</span>
           <span className="panel__aside">
             {run
               ? `${run.records_published} published · ${run.records_quarantined} quarantined · ${
