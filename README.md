@@ -5,7 +5,11 @@ source against a declared contract, blocks the batch when the source changes sha
 extraction mapping with an LLM, and makes the repair prove itself twice before a single record
 moves downstream.
 
-![The dashboard after a repair](docs/dashboard.png)
+**[Try the live demo](https://driftlock-tf73.onrender.com/)** — break the source in one click and
+watch the repair argue its way past both gates. Runs on a free instance, so the first request can
+take about 50 seconds to wake it.
+
+![The dashboard after a repair: both gates passed, eight records published, stamped repaired](docs/dashboard.png)
 
 ## The problem
 
@@ -23,6 +27,12 @@ Driftlock has a batch-level rule for each, because neither is visible one row at
 
 ## Try it
 
+The live demo is the same app, seeded fresh on every restart:
+
+![The form before the first run: no verdict yet, and the record sheet still ruled and empty](docs/dashboard-empty.png)
+
+To run it locally instead:
+
 ```bash
 ./.venv/bin/python manage.py runserver
 ```
@@ -37,6 +47,11 @@ so the whole demo runs with no external site involved.
    Nothing errors. Run again: `price` is present in 0% of rows and `name` has collapsed to 12%
    distinct values, so the batch is blocked and the repair begins.
 3. **Redesign the source.** The markup is rebuilt entirely and the row selector stops matching.
+
+Every run writes its own record: what was read, what the validator measured, why the batch was
+blocked, what the model proposed, and how each gate ruled on it.
+
+![The inspection record listing each step of a run, beside the repaired mapping and its diff](docs/inspection-record.png)
 
 ## How a repair proves itself
 
