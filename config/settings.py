@@ -173,7 +173,10 @@ DRIFTLOCK = {
     "DEMO_BASE_URL": os.environ.get("DRIFTLOCK_DEMO_BASE_URL", "http://127.0.0.1:8000"),
 }
 
-if os.environ.get("DATABASE_URL"):
+# DATABASE_ENGINE=sqlite wins over a DATABASE_URL still set on the host. The
+# public demo runs on SQLite because Render deletes free Postgres databases
+# after 30 days, and a dead URL would keep the app from booting.
+if os.environ.get("DATABASE_URL") and os.environ.get("DATABASE_ENGINE", "").lower() != "sqlite":
     import dj_database_url
     DATABASES["default"] = dj_database_url.parse(
         os.environ["DATABASE_URL"], conn_max_age=600

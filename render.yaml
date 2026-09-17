@@ -24,11 +24,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: driftlock-db
-          property: connectionString
-
-databases:
-  - name: driftlock-db
-    plan: free
+      # SQLite inside the instance; see gunicorn.conf.py. Overrides the
+      # DATABASE_URL the free Postgres left behind (Render deletes those
+      # after 30 days).
+      - key: DATABASE_ENGINE
+        value: sqlite
