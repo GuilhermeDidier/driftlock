@@ -4,11 +4,15 @@
 <body>
   <header class="site-header"><h1 class="site-title">Ofertas da Semana</h1></header>
   <main>
+    {% comment %}
+      Same cards as v1. Two things moved, and nothing errors:
+      - the name left .title, which is now a static label on every card
+      - .price became .amount
+      Multi-line comments need this tag: {# #} spans one line only, and a
+      broken one renders into the page the healer reads.
+    {% endcomment %}
     <div class="product-grid">
       {% for p in products %}
-      {# Same cards as v1. Two things moved, and nothing errors:
-         - the name left .title, which is now a static label on every card
-         - .price became .amount                                            #}
       <div class="product-card">
         <span class="title">Produto</span>
         <h3 class="product-name">{{ p.name }}</h3>
