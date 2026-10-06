@@ -1,5 +1,7 @@
 # Driftlock
 
+[![CI](https://github.com/GuilhermeDidier/driftlock/actions/workflows/ci.yml/badge.svg)](https://github.com/GuilhermeDidier/driftlock/actions/workflows/ci.yml)
+
 **Data-contract enforcement for sources that change without telling you.** Driftlock reads a
 source against a declared contract, blocks the batch when the source changes shape, repairs the
 extraction mapping with an LLM, and makes the repair prove itself twice before a single record
