@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
+      - name: Migrations match the models
+        run: python manage.py makemigrations --check --dry-run
+
       # No ANTHROPIC_API_KEY here: the suite stubs the healer and must pass without it.
       - name: Tests
         run: pytest -q
@@ -37,7 +40,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          # Render's build reads the same file, so CI builds with the Node it deploys with.
+          node-version-file: .node-version
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
